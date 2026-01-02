@@ -1,0 +1,890 @@
+#! /usr/bin/env mflowgen-python
+#=========================================================================
+# mflowgen-letters
+#=========================================================================
+# Print big letters adapted from the 'Ivrit' font of the figlet package.
+#
+#  -h --help     Display this message
+#  -v --verbose  Verbose mode
+#  -c --color    Print in color
+#  -t --text     Text to print big
+#     --all      Do not truncate the text length
+#
+# Author : Christopher Torng
+# Date   : June 12, 2019
+#
+
+#-------------------------------------------------------------------------
+# License file for the figlet package
+#-------------------------------------------------------------------------
+# Copyright (C) 1991, 1993, 1994 Glenn Chappell and Ian Chai
+# Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001 John Cowan
+# Copyright (C) 2002 Christiaan Keet
+# Copyright (C) 2011 Claudio Matsuoka
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. Neither the name of the copyright holders nor the names of their
+#    contributors may be used to endorse or promote products derived
+#    from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+# OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+# TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
+# USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+import argparse
+import sys
+
+#-------------------------------------------------------------------------
+# Command line processing
+#-------------------------------------------------------------------------
+
+class ArgumentParserWithCustomError(argparse.ArgumentParser):
+  def error( self, msg = "" ):
+    if ( msg ): print( "\n ERROR: %s" % msg )
+    print()
+    file = open( sys.argv[0] )
+    for ( lineno, line ) in enumerate( file ):
+      if ( line[0] != '#' ): sys.exit(msg != "")
+      if ( (lineno == 2) or (lineno >= 4) ): print( line[1:].rstrip("\n") )
+
+def parse_cmdline():
+  p = ArgumentParserWithCustomError( add_help=False )
+  p.add_argument( "-v", "--verbose", action="store_true" )
+  p.add_argument( "-h", "--help",    action="store_true" )
+  p.add_argument( "-c", "--color",   action="store_true" )
+  p.add_argument( "-t", "--text",    default="foo"       )
+  p.add_argument(       "--all",     action="store_true" )
+  opts = p.parse_args()
+  if opts.help: p.error()
+  return opts
+
+#-------------------------------------------------------------------------
+# Letters
+#-------------------------------------------------------------------------
+
+letters = {}
+
+letters['A'] = [
+  r"    _    ",
+  r"   / \   ",
+  r"  / _ \  ",
+  r" / ___ \ ",
+  r"/_/   \_" "\\",
+  r"         ",
+]
+letters['B'] = [
+  r" ____  ",
+  r"| __ ) ",
+  r"|  _ \ ",
+  r"| |_) |",
+  r"|____/ ",
+  r"       ",
+]
+letters['C'] = [
+  r"  ____ ",
+  r" / ___|",
+  r"| |    ",
+  r"| |___ ",
+  r" \____|",
+  r"       ",
+]
+letters['D'] = [
+  r" ____  ",
+  r"|  _ \ ",
+  r"| | | |",
+  r"| |_| |",
+  r"|____/ ",
+  r"       ",
+]
+letters['E'] = [
+  r" _____ ",
+  r"| ____|",
+  r"|  _|  ",
+  r"| |___ ",
+  r"|_____|",
+  r"       ",
+]
+letters['F'] = [
+  r" _____ ",
+  r"|  ___|",
+  r"| |_   ",
+  r"|  _|  ",
+  r"|_|    ",
+  r"       ",
+]
+letters['G'] = [
+  r"  ____ ",
+  r" / ___|",
+  r"| |  _ ",
+  r"| |_| |",
+  r" \____|",
+  r"       ",
+]
+letters['H'] = [
+  r" _   _ ",
+  r"| | | |",
+  r"| |_| |",
+  r"|  _  |",
+  r"|_| |_|",
+  r"       ",
+]
+letters['I'] = [
+  r" ___ ",
+  r"|_ _|",
+  r" | | ",
+  r" | | ",
+  r"|___|",
+  r"     ",
+]
+letters['J'] = [
+  r"     _ ",
+  r"    | |",
+  r" _  | |",
+  r"| |_| |",
+  r" \___/ ",
+  r"       ",
+]
+letters['K'] = [
+  r" _  __",
+  r"| |/ /",
+  r"| ' / ",
+  r"| . \ ",
+  r"|_|\_" "\\",
+  r"      ",
+]
+letters['L'] = [
+  r" _     ",
+  r"| |    ",
+  r"| |    ",
+  r"| |___ ",
+  r"|_____|",
+  r"       ",
+]
+letters['M'] = [
+  r" __  __ ",
+  r"|  \/  |",
+  r"| |\/| |",
+  r"| |  | |",
+  r"|_|  |_|",
+  r"        ",
+]
+letters['N'] = [
+  r" _   _ ",
+  r"| \ | |",
+  r"|  \| |",
+  r"| |\  |",
+  r"|_| \_|",
+  r"       ",
+]
+letters['O'] = [
+  r"  ___  ",
+  r" / _ \ ",
+  r"| | | |",
+  r"| |_| |",
+  r" \___/ ",
+  r"       ",
+]
+letters['P'] = [
+  r" ____  ",
+  r"|  _ \ ",
+  r"| |_) |",
+  r"|  __/ ",
+  r"|_|    ",
+  r"       ",
+]
+letters['Q'] = [
+  r"  ___  ",
+  r" / _ \ ",
+  r"| | | |",
+  r"| |_| |",
+  r" \__\_" "\\",
+  r"       ",
+]
+letters['R'] = [
+  r" ____  ",
+  r"|  _ \ ",
+  r"| |_) |",
+  r"|  _ < ",
+  r"|_| \_" "\\",
+  r"       ",
+]
+letters['S'] = [
+  r" ____  ",
+  r"/ ___| ",
+  r"\___ \ ",
+  r" ___) |",
+  r"|____/ ",
+  r"       ",
+]
+letters['T'] = [
+  r" _____ ",
+  r"|_   _|",
+  r"  | |  ",
+  r"  | |  ",
+  r"  |_|  ",
+  r"       ",
+]
+letters['U'] = [
+  r" _   _ ",
+  r"| | | |",
+  r"| | | |",
+  r"| |_| |",
+  r" \___/ ",
+  r"       ",
+]
+letters['V'] = [
+  r"__     __",
+  r"\ \   / /",
+  r" \ \ / / ",
+  r"  \ V /  ",
+  r"   \_/   ",
+  r"         ",
+]
+letters['W'] = [
+  r"__        __",
+  r"\ \      / /",
+  r" \ \ /\ / / ",
+  r"  \ V  V /  ",
+  r"   \_/\_/   ",
+  r"            ",
+]
+letters['X'] = [
+  r"__  __",
+  r"\ \/ /",
+  r" \  / ",
+  r" /  \ ",
+  r"/_/\_" "\\",
+  r"      ",
+]
+letters['Y'] = [
+  r"__   __",
+  r"\ \ / /",
+  r" \ V / ",
+  r"  | |  ",
+  r"  |_|  ",
+  r"       ",
+]
+letters['Z'] = [
+  r" _____",
+  r"|__  /",
+  r"  / / ",
+  r" / /_ ",
+  r"/____|",
+  r"      ",
+]
+
+#-------------------------------------------------------------------------
+
+letters['a'] = [
+  r"       ",
+  r"  __ _ ",
+  r" / _` |",
+  r"| (_| |",
+  r" \__,_|",
+  r"       ",
+]
+letters['b'] = [
+  r" _     ",
+  r"| |__  ",
+  r"| '_ \ ",
+  r"| |_) |",
+  r"|_.__/ ",
+  r"       ",
+]
+letters['c'] = [
+  r"      ",
+  r"  ___ ",
+  r" / __|",
+  r"| (__ ",
+  r" \___|",
+  r"      ",
+]
+letters['d'] = [
+  r"     _ ",
+  r"  __| |",
+  r" / _` |",
+  r"| (_| |",
+  r" \__,_|",
+  r"       ",
+]
+letters['e'] = [
+  r"      ",
+  r"  ___ ",
+  r" / _ " "\\",
+  r"|  __/",
+  r" \___|",
+  r"      ",
+]
+letters['f'] = [
+  r"  __ ",
+  r" / _|",
+  r"| |_ ",
+  r"|  _|",
+  r"|_|  ",
+  r"     ",
+]
+letters['g'] = [
+  r"       ",
+  r"  __ _ ",
+  r" / _` |",
+  r"| (_| |",
+  r" \__, |",
+  r" |___/ ",
+]
+letters['h'] = [
+  r" _     ",
+  r"| |__  ",
+  r"| '_ \ ",
+  r"| | | |",
+  r"|_| |_|",
+  r"       ",
+]
+letters['i'] = [
+  r" _ ",
+  r"(_)",
+  r"| |",
+  r"| |",
+  r"|_|",
+  r"   ",
+]
+letters['j'] = [
+  r"     ",
+  r"   _ ",
+  r"  (_)",
+  r"  | |",
+  r" _/ |",
+  r"|__/ ",
+]
+letters['k'] = [
+  r" _    ",
+  r"| | __",
+  r"| |/ /",
+  r"|   < ",
+  r"|_|\_" "\\",
+  r"      ",
+]
+letters['l'] = [
+  r" _ ",
+  r"| |",
+  r"| |",
+  r"| |",
+  r"|_|",
+  r"   ",
+]
+letters['m'] = [
+  r"           ",
+  r" _ __ ___  ",
+  r"| '_ ` _ \ ",
+  r"| | | | | |",
+  r"|_| |_| |_|",
+  r"           ",
+]
+letters['n'] = [
+  r"       ",
+  r" _ __  ",
+  r"| '_ \ ",
+  r"| | | |",
+  r"|_| |_|",
+  r"       ",
+]
+letters['o'] = [
+  r"       ",
+  r"  ___  ",
+  r" / _ \ ",
+  r"| (_) |",
+  r" \___/ ",
+  r"       ",
+]
+letters['p'] = [
+  r"       ",
+  r" _ __  ",
+  r"| '_ \ ",
+  r"| |_) |",
+  r"| .__/ ",
+  r"|_|    ",
+]
+letters['q'] = [
+  r"       ",
+  r"  __ _ ",
+  r" / _` |",
+  r"| (_| |",
+  r" \__, |",
+  r"    |_|",
+]
+letters['r'] = [
+  r"      ",
+  r" _ __ ",
+  r"| '__|",
+  r"| |   ",
+  r"|_|   ",
+  r"      ",
+]
+letters['s'] = [
+  r"     ",
+  r" ___ ",
+  r"/ __|",
+  r"\__ " "\\",
+  r"|___/",
+  r"     ",
+]
+letters['t'] = [
+  r" _   ",
+  r"| |_ ",
+  r"| __|",
+  r"| |_ ",
+  r" \__|",
+  r"     ",
+]
+letters['u'] = [
+  r"       ",
+  r" _   _ ",
+  r"| | | |",
+  r"| |_| |",
+  r" \__,_|",
+  r"       ",
+]
+letters['v'] = [
+  r"       ",
+  r"__   __",
+  r"\ \ / /",
+  r" \ V / ",
+  r"  \_/  ",
+  r"       ",
+]
+letters['w'] = [
+  r"          ",
+  r"__      __",
+  r"\ \ /\ / /",
+  r" \ V  V / ",
+  r"  \_/\_/  ",
+  r"          ",
+]
+letters['x'] = [
+  r"      ",
+  r"__  __",
+  r"\ \/ /",
+  r" >  < ",
+  r"/_/\_" "\\",
+  r"      ",
+]
+letters['y'] = [
+  r"       ",
+  r" _   _ ",
+  r"| | | |",
+  r"| |_| |",
+  r" \__, |",
+  r" |___/ ",
+]
+letters['z'] = [
+  r"     ",
+  r" ____",
+  r"|_  /",
+  r" / / ",
+  r"/___|",
+  r"     ",
+]
+
+#-------------------------------------------------------------------------
+
+letters['1'] = [
+  r" _ ",
+  r"/ |",
+  r"| |",
+  r"| |",
+  r"|_|",
+  r"   ",
+]
+letters['2'] = [
+  r" ____  ",
+  r"|___ \ ",
+  r"  __) |",
+  r" / __/ ",
+  r"|_____|",
+  r"       ",
+]
+letters['3'] = [
+  r" _____ ",
+  r"|___ / ",
+  r"  |_ \ ",
+  r" ___) |",
+  r"|____/ ",
+  r"       ",
+]
+letters['4'] = [
+  r" _  _   ",
+  r"| || |  ",
+  r"| || |_ ",
+  r"|__   _|",
+  r"   |_|  ",
+  r"        ",
+]
+letters['5'] = [
+  r" ____  ",
+  r"| ___| ",
+  r"|___ \ ",
+  r" ___) |",
+  r"|____/ ",
+  r"       ",
+]
+letters['6'] = [
+  r"  __   ",
+  r" / /_  ",
+  r"| '_ \ ",
+  r"| (_) |",
+  r" \___/ ",
+  r"       ",
+]
+letters['7'] = [
+  r" _____ ",
+  r"|___  |",
+  r"   / / ",
+  r"  / /  ",
+  r" /_/   ",
+  r"       ",
+]
+letters['8'] = [
+  r"  ___  ",
+  r" ( _ ) ",
+  r" / _ \ ",
+  r"| (_) |",
+  r" \___/ ",
+  r"       ",
+]
+letters['9'] = [
+  r"  ___  ",
+  r" / _ \ ",
+  r"| (_) |",
+  r" \__, |",
+  r"   /_/ ",
+  r"       ",
+]
+letters['0'] = [
+  r"  ___  ",
+  r" / _ \ ",
+  r"| | | |",
+  r"| |_| |",
+  r" \___/ ",
+  r"       ",
+]
+
+#-------------------------------------------------------------------------
+
+letters[' '] = [
+  r"   ",
+  r"   ",
+  r"   ",
+  r"   ",
+  r"   ",
+  r"   ",
+]
+letters['.'] = [
+  r"   ",
+  r"   ",
+  r"   ",
+  r" _ ",
+  r"(_)",
+  r"   ",
+]
+letters[','] = [
+  r"   ",
+  r"   ",
+  r" _ ",
+  r"( )",
+  r"|/ ",
+  r"   ",
+]
+letters['!'] = [
+  r" _ ",
+  r"| |",
+  r"| |",
+  r"|_|",
+  r"(_)",
+  r"   ",
+]
+letters['@'] = [
+  r"   ____  ",
+  r"  / __ \ ",
+  r" / / _` |",
+  r"| | (_| |",
+  r" \ \__,_|",
+  r"  \____/ ",
+]
+letters['#'] = [
+  r"   _  _   ",
+  r" _| || |_ ",
+  r"|_  ..  _|",
+  r"|_      _|",
+  r"  |_||_|  ",
+  r"          ",
+]
+letters['$'] = [
+  r"  _  ",
+  r" | | ",
+  r"/ __)",
+  r"\__ " "\\",
+  r"(   /",
+  r" |_| ",
+]
+letters['%'] = [
+  r" _  __",
+  r"(_)/ /",
+  r"  / / ",
+  r" / /_ ",
+  r"/_/(_)",
+  r"      ",
+]
+letters['^'] = [
+  r" /\ ",
+  r"|/\|",
+  r"    ",
+  r"    ",
+  r"    ",
+  r"    ",
+]
+letters['&'] = [
+  r"  ___   ",
+  r" ( _ )  ",
+  r" / _ \/" "\\",
+  r"| (_>  <",
+  r" \___/\/",
+  r"        ",
+]
+letters['*'] = [
+  r"      ",
+  r"__/\__",
+  r"\    /",
+  r"/_  _" "\\",
+  r"  \/  ",
+  r"      ",
+]
+letters['('] = [
+  r"  __ ",
+  r" / / ",
+  r"| |  ",
+  r"| |  ",
+  r" \_\ ",
+  r"     ",
+]
+letters[')'] = [
+  r" __  ",
+  r" \ \ ",
+  r"  | |",
+  r"  | |",
+  r" /_/ ",
+  r"     ",
+]
+letters['-'] = [
+  r"        ",
+  r"        ",
+  r" ______ ",
+  r"|______|",
+  r"        ",
+  r"        ",
+]
+letters['_'] = [
+  r"        ",
+  r"        ",
+  r"        ",
+  r" ______ ",
+  r"|______|",
+  r"        ",
+]
+letters['+'] = [
+  r"       ",
+  r"   _   ",
+  r" _| |_ ",
+  r"|_   _|",
+  r"  |_|  ",
+  r"       ",
+]
+letters['='] = [
+  r"        ",
+  r" ______ ",
+  r"|______|",
+  r"|______|",
+  r"        ",
+  r"        ",
+]
+letters['/'] = [
+  r"    __",
+  r"   / /",
+  r"  / / ",
+  r" / /  ",
+  r"/_/   ",
+  r"      ",
+]
+letters['\\'] = [
+  r"__    ",
+  r"\ \   ",
+  r" \ \  ",
+  r"  \ \ ",
+  r"   \_" "\\",
+  r"      ",
+]
+letters['{'] = [
+  r"   __",
+  r"  / /",
+  r" | | ",
+  r"< <  ",
+  r" | | ",
+  r"  \_" "\\",
+]
+letters['}'] = [
+  r"__   ",
+  r"\ \  ",
+  r" | | ",
+  r"  > >",
+  r" | | ",
+  r"/_/  ",
+]
+letters['['] = [
+  r" __ ",
+  r"| _|",
+  r"| | ",
+  r"| | ",
+  r"| | ",
+  r"|__|",
+]
+letters[']'] = [
+  r" __ ",
+  r"|_ |",
+  r" | |",
+  r" | |",
+  r" | |",
+  r"|__|",
+]
+letters['<'] = [
+  r"  __",
+  r" / /",
+  r"/ / ",
+  r"\ \ ",
+  r" \_" "\\",
+  r"    ",
+]
+letters['>'] = [
+  r"__  ",
+  r"\ \ ",
+  r" \ " "\\",
+  r" / /",
+  r"/_/ ",
+  r"    ",
+]
+letters['?'] = [
+  r" ___ ",
+  r"|__ " "\\",
+  r"  / /",
+  r" |_| ",
+  r" (_) ",
+  r"     ",
+]
+letters['|'] = [
+  r" _ ",
+  r"| |",
+  r"| |",
+  r"| |",
+  r"| |",
+  r"|_|",
+]
+letters['`'] = [
+  r" _ ",
+  r"( )",
+  r" \|",
+  r"   ",
+  r"   ",
+  r"   ",
+]
+letters['\''] = [
+  r" _ ",
+  r"( )",
+  r"|/ ",
+  r"   ",
+  r"   ",
+  r"   ",
+]
+letters['"'] = [
+  r" _ _ ",
+  r"( | )",
+  r" V V ",
+  r"     ",
+  r"     ",
+  r"     ",
+]
+letters[';'] = [
+  r" _ ",
+  r"(_)",
+  r" _ ",
+  r"( )",
+  r"|/ ",
+  r"   ",
+]
+letters[':'] = [
+  r"   ",
+  r" _ ",
+  r"(_)",
+  r" _ ",
+  r"(_)",
+  r"   ",
+]
+letters['~'] = [
+  r"     ",
+  r"     ",
+  r" /\/|",
+  r"|/\/ ",
+  r"     ",
+  r"     ",
+]
+
+#-------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------
+
+def main():
+  opts = parse_cmdline()
+
+  if not opts.all and len(opts.text) > 14:
+    text = opts.text[:3] + ' .. ' + opts.text[-11:]
+  else:
+    text = opts.text
+
+  echo_green   = '\033[92m'
+  echo_nocolor = '\033[0m'
+
+  height = 6
+
+  errors = set()
+
+  if opts.color: print( echo_green )
+  for i in range( height ):
+    for l in text:
+      if l not in letters.keys():
+        errors.add( 'Error: No data for character "%s"' % l )
+        continue
+      print( letters[l][i], end=' ' )
+    print()
+  if opts.color: print( echo_nocolor )
+
+  for e in errors:
+    print( e )
+
+
+if __name__ == '__main__':
+  main()
+
