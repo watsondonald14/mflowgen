@@ -1,0 +1,105 @@
+#=========================================================================
+# Mentor Calibre LVS
+#=========================================================================
+# Author : Christopher Torng
+# Date   : November 5, 2019
+#
+
+name: mentor-calibre-lvs
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - adk
+  - design_merged.gds
+  - design.lvs.v
+  - rules.svrf
+
+outputs:
+  - lvs.report
+  - design.schematic.spi
+  - design_merged.lvs.v
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  - if [ -z "$lvs_hcells_file" ]; then export lvs_use_hcells=0; else export lvs_use_hcells=1; fi
+  - if [ -z "$lvs_connect_names" ]; then export lvs_connect_names_state=NONE; else export lvs_connect_names_state=SOME; fi
+  - envsubst < lvs.runset.template > lvs.runset
+  - if [ ! -f inputs/*.svrf ]; then touch inputs/rules.svrf; fi
+  - cat inputs/*.lvs.v > merged.lvs.v
+  - calibre -gui -lvs -batch -runset lvs.runset
+  - mkdir -p outputs && cd outputs
+  - ln -sf ../lvs.report
+  - ln -sf ../_merged.lvs.v.sp design.schematic.spi
+  - ln -sf ../merged.lvs.v design_merged.lvs.v
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  design_name: undefined
+  #
+  # lvs_hcells_file:
+  #
+  # - Path to hcells file if required
+  #
+  lvs_hcells_file: ""
+  #
+  # lvs_connect_names:
+  #
+  # - Nets to connect in a quoted, space-separated list, e.g. "VDD VSS"
+  # - Updating this from python looks something like this (notice quotes):
+  #     dc.update_params( { 'lvs_connect_names' : '"VDD VSS VDDPST"' } )
+  # - Note that "cmnVConnectNamesState" can be "NONE", "ALL", or "SOME".
+  #   Setting it to "SOME" tells the tool to look at the
+  #   "cmnVConnectNames" field and globally connect any of these nets by
+  #   name in the extracted layout.
+  #
+  lvs_connect_names: ""
+  #
+  # lvs_verify_netlist:
+  #
+  # - Whether we should verify the source netlist after the v2lvs step.
+  #   Useful to set to 0 if some sources don't have all of their dependencies
+  #   present, such as when using LVS BOX.
+  #
+  lvs_verify_netlist: 1
+  #
+  # lvs_extra_spice_include:
+  #
+  # - [steveri 01/2021] Added lvs_extra_spice_include to support where
+  # e.g.  most of the chip uses stdview but one IP block (dragonphy in
+  # our case) needs a different view b/c it uses LVT cells etc.
+  #
+  lvs_extra_spice_include: ""
+
+#-------------------------------------------------------------------------
+# Debug
+#-------------------------------------------------------------------------
+
+debug:
+  - calibredrv -m inputs/design_merged.gds \
+               -l inputs/adk/calibre.layerprops \
+               -rve -lvs svdb
+
+#-------------------------------------------------------------------------
+# Assertions
+#-------------------------------------------------------------------------
+
+preconditions:
+
+  - assert Tool( 'calibre' )
+  - assert File( 'inputs/adk' )
+  - assert File( 'inputs/design_merged.gds' )
+  - assert File( 'inputs/design.lvs.v' )
+
+postconditions:
+
+  - "assert '#     INCORRECT     #' not in File( 'lvs.report' )"
+
