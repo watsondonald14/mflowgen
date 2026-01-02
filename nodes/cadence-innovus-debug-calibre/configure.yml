@@ -1,0 +1,34 @@
+#=========================================================================
+# Cadence Innovus
+#=========================================================================
+# Author : Christopher Torng
+# Date   : November 8, 2019
+#
+
+name: cadence-innovus-debug-calibre
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - innovus-foundation-flow
+  - adk
+  - design.checkpoint
+  - drc.results
+  - lvs.results
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  # Set up innovus debug view
+  - ln -sf inputs/innovus-foundation-flow
+  - mkdir -p checkpoints
+  - cd checkpoints && ln -sf ../inputs/design.checkpoint && cd ..
+  # Open innovus debug view
+  - innovus -overwrite -64
+    -init innovus-foundation-flow/custom-scripts/run-debug.tcl
+    -log logs/debug.log
+
