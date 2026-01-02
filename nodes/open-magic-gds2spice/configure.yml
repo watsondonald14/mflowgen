@@ -1,0 +1,30 @@
+#=========================================================================
+# Extract spice from GDS using magic
+#=========================================================================
+# Author : Kartik Prabhu
+# Date   : May 21, 2021
+#
+
+name: open-magic-gds2spice
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+inputs:
+  - adk
+  - design-merged.gds
+
+outputs:
+  - design_extracted.spice
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  design_name: undefined
+
+commands:
+  - cp inputs/adk/magicrc .magicrc
+  - magic -noconsole -dnull extract.tcl | tee gds2spice.log
+  - mv {design_name}.spice outputs/design_extracted.spice
