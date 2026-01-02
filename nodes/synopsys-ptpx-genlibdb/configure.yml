@@ -1,0 +1,64 @@
+#=========================================================================
+# Synopsys PTPX -- Generate .lib and .db
+#=========================================================================
+
+name: synopsys-ptpx-genlibdb
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - adk
+  - design.vcs.v
+  - design.spef.gz
+  - design.pt.sdc
+
+outputs:
+  - design.lib
+  - design.db
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  - mkdir -p logs
+  - pt_shell -file START.tcl -output_log_file logs/pt.log
+  - mkdir -p outputs && cd outputs
+  - ln -sf ../*.db  design.db
+  - ln -sf ../*.lib design.lib
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  design_name: undefined
+  order:
+    - read_design.tcl
+    - extract_model.tcl
+    - write-interface-timing.tcl
+
+#-------------------------------------------------------------------------
+# Assertions
+#-------------------------------------------------------------------------
+
+preconditions:
+
+  - assert Tool( 'pt_shell' )                # tool check
+  - assert File( 'inputs/adk' )              # must exist
+  - assert File( 'inputs/design.vcs.v' )     # must exist
+  - assert File( 'inputs/design.pt.sdc' )    # must exist
+# - assert File( 'inputs/design.spef.gz' )   # spef is optional
+
+postconditions:
+
+  - assert File( 'outputs/design.lib' )      # must exist
+  - assert File( 'outputs/design.db' )       # must exist
+
+  # Basic error checking
+
+  - assert 'Error:' not in File( 'logs/pt.log' )
+  - assert 'Unresolved references' not in File( 'logs/pt.log' )
+  - assert 'Unable to resolve' not in File( 'logs/pt.log' )
