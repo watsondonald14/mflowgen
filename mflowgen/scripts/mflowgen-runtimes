@@ -1,0 +1,125 @@
+#! /usr/bin/env mflowgen-python
+#=========================================================================
+# mflowgen-runtimes
+#=========================================================================
+# Print runtimes for each build directory from the timestamps
+#
+# The build dirs should have two timestamps in format '%Y-%m%d-%H%M-%S'
+#
+# - .time_start
+# - .time_end
+#
+# The output should look something like this:
+#
+#     ----------------------------------------------------------------
+#     Runtimes
+#     ----------------------------------------------------------------
+#     0-rtl                               --                 1 sec
+#     1-adk                               --                 0 sec
+#     2-synopsys-dc-synthesis             --          3 min 16 sec
+#     ----------------------------------------------------------------
+#     Total                               --          3 min 17 sec
+#
+# Author : Christopher Torng
+# Date   : June 2, 2019
+#
+
+import datetime as dt
+import os
+
+#-------------------------------------------------------------------------
+# Main
+#-------------------------------------------------------------------------
+
+def main():
+
+  #-----------------------------------------------------------------------
+  # Compute runtimes from timestamps
+  #-----------------------------------------------------------------------
+
+  runtimes = {}
+  finished = {}
+
+  nodes = sorted( [ _ for _ in os.listdir('.') if os.path.isdir(_) ] )
+  nodes = [ _ for _ in nodes if _[0].isdigit() ] # filter for numbered
+
+  for d in nodes:
+
+    # Get start timestamp
+
+    start_f = d + '/.time_start'
+
+    if not os.path.exists( start_f ):
+      continue
+
+    with open( start_f ) as fd:
+      start = fd.read().strip()
+      start = dt.datetime.strptime( start, '%Y-%m%d-%H%M-%S' )
+
+    # Get end timestamp
+
+    end_f = d + '/.time_end'
+
+    if os.path.exists( end_f ):
+      node_finished = True
+      with open( end_f ) as fd:
+        end = fd.read().strip()
+        end = dt.datetime.strptime( end, '%Y-%m%d-%H%M-%S' )
+
+    else:
+      node_finished = False
+      end = dt.datetime.now()
+
+    # Compute runtime
+
+    runtimes[d] = end - start
+    finished[d] = node_finished
+
+  #-----------------------------------------------------------------------
+  # Report runtimes
+  #-----------------------------------------------------------------------
+
+  print( '-'*80 )
+  print( 'Runtimes' )
+  print( '-'*80 )
+
+  def print_time( node, runtime_seconds, node_finished=True ):
+
+    template_str = \
+      '{node: <35} -- {h: >7} {m: >6} {s: >6} {tag}'
+
+    h = int( ( runtime_seconds / 60 ) / 60 )
+    m = int( ( runtime_seconds / 60 ) % 60 )
+    s = int(   runtime_seconds % 60        )
+
+    h_str = str( h ) + ' hr'  if h > 0 else ''
+    m_str = str( m ) + ' min' if m > 0 else ''
+    s_str = str( s ) + ' sec'
+
+    print( template_str.format(
+      node = node,
+      h    = h_str,
+      m    = m_str,
+      s    = s_str,
+      tag  = '' if node_finished else ' <-- in progress',
+    ))
+
+  for node in sorted( runtimes.keys(), # sort in numerical order
+                      key=lambda x: int(x.split('-')[0]) ):
+    node_finished   = finished[node]
+    runtime_seconds = runtimes[node].total_seconds()
+    print_time( node, runtime_seconds, node_finished )
+
+  # Report total runtime as well
+
+  runtime_seconds = \
+    sum( runtimes.values(), dt.timedelta() ).total_seconds()
+
+  print( '-'*80 )
+  print_time( 'Total', runtime_seconds, True )
+
+
+if __name__ == '__main__':
+  main()
+
+
