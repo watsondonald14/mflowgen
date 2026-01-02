@@ -1,0 +1,175 @@
+#=========================================================================
+# Synopsys DC Synthesis
+#=========================================================================
+# Author : Christopher Torng, Yanghui Ou
+# Date   : June 7, 2019
+#
+
+name: synopsys-dc-synthesis
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - adk
+  - design.v
+  - constraints.tcl
+  - run.saif
+  - design.upf
+
+outputs:
+  - design.v
+  - design.sdc
+  - design.namemap
+  - design.svf
+  - design.upf
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  - bash run.sh
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  design_name: undefined
+  clock_period: 1.0
+  # Path to the design instance in run.saif (e.g., tb/dut)
+  saif_instance: undefined
+  # Flatten effort 0 is strict hierarchy, 3 is full flattening
+  flatten_effort: 0
+  topographical: True
+  # Multithreading available to the tool
+  nthreads: 16
+  # Enable high-effort area optimization (has longer spin time)
+  high_effort_area_opt: False
+  # Automatic fine-grain clock gating
+  gate_clock: True
+  # Uniquify by prefixing every module in the design with the design name.
+  # This is useful for hierarchical LVS when multiple blocks use modules
+  # with the same name but different definitions.
+  uniquify_with_design_name: True
+  # Enable supression of selected warnings/messages. 
+  suppress_msg: False
+  # List of suppressed messages. Select carefully
+  suppressed_msg:
+    # MW techhnology file load messages abaout missing attributes 
+    - TFCHK-072
+    - TFCHK-014
+    - TFCHK-049
+    - TFCHK-050
+    - TFCHK-012
+    - TFCHK-073
+    - TFCHK-092
+    # orientation warning from MW
+    - PSYN-651
+    - PSYN-650
+  # Subscript execute order
+  order:
+    - designer-interface.tcl
+    - setup-session.tcl
+    - read-design.tcl
+    - constraints.tcl
+    - make-path-groups.tcl
+    - compile-options.tcl
+    - compile.tcl
+    - generate-results.tcl
+    - reporting.tcl
+
+#-------------------------------------------------------------------------
+# Debug
+#-------------------------------------------------------------------------
+
+debug:
+  - export DC_EXIT_AFTER_SETUP=1
+  - ln -sf results/*.mapped.ddc debug.ddc
+  - design_vision-xg -topographical -x "source START.tcl; read_ddc debug.ddc"
+
+#-------------------------------------------------------------------------
+# Assertions
+#-------------------------------------------------------------------------
+
+preconditions:
+
+  - assert Tool( 'dc_shell-xg-t' )           # tool check
+  - assert File( 'inputs/adk' )              # must exist
+  - assert File( 'inputs/design.v' )         # must exist
+  - assert File( 'inputs/constraints.tcl' )  # must exist
+
+postconditions:
+
+  - assert File( 'outputs/design.v' )        # must exist
+  - assert File( 'outputs/design.sdc' )      # must exist
+
+  # Basic error checking
+
+  - assert 'error:' not in File( 'logs/dc.log' )
+  - assert 'Unresolved references' not in File( 'logs/dc.log' )
+  - assert 'Unable to resolve' not in File( 'logs/dc.log' )
+  - assert 'Presto compilation terminated' not in File( 'logs/dc.log' )
+
+  # If GTECH is found, that means this design was not mapped to a
+  # technology library and is still in DC's generic representation
+
+  - assert 'GTECH' not in File( 'outputs/design.v' )
+
+  # ELAB-405
+  #
+  # When using a Verilog generation tool, there may be a
+  # generation/translation mistake that defines a net twice. This will give
+  # a message like this:
+  #
+  #     Warning:  ./inputs/design.v:2473: Net mul__recv__msg__opd_b[0] or a
+  #     directly connected net may be driven by more than one process or block.
+  #     (ELAB-405)
+  #
+  # Multiply driven nets is usually a very bad sign.
+  #
+
+  - assert 'ELAB-405' not in File( 'logs/dc.log' )
+
+  # PSYN-024, PSYN-025, and PSYN-039
+  #
+  # PSYN-024 and PSYN-025 are warnings about inconsistent logical/physical
+  # libraries (logical is db, physical is lef). PSYN-024 says a logical
+  # definition of a cell exists and physical does not, and PSYN-025 says
+  # the physical definition exists but logical does not. If either of
+  # these appears, then PSYN-039 usually also appears which tells you that
+  # the inconsistent cell will be marked "dont_use".
+  #
+  # This is a problem if you _do_ expect those cells to be used by
+  # synthesis. In the most problematic case, if synthesis cannot find
+  # another candidate it may not do anything at all. For example, if no
+  # balanced-drive buffer cells are available, it may use an
+  # imbalanced-drive buffer. If no always-on power-domain buffer cells are
+  # available, it may not buffer at all.
+  #
+  # Technically, these cases are not a problem if you do _not_ expect
+  # synthesis to use that cell in the first place (e.g., if an IO cell is
+  # marked dont_use, it can be fine because synthesis should not be adding
+  # or using any IO cells). In these cases, you can either comment out
+  # this assertion (and risk missing other important cases), or you can
+  # just fix the inconsistency.
+  #
+
+  - assert 'PSYN-024' not in File( 'logs/dc.log' )
+  - assert 'PSYN-025' not in File( 'logs/dc.log' )
+  - assert 'PSYN-039' not in File( 'logs/dc.log' )
+
+  # Sanity check that there is a clock in the constraints
+
+  - assert 'create_clock' in File( 'outputs/design.sdc' )
+
+  # Check that at least N% of registers were clock-gated
+
+  - |
+    from assertion_helpers import percent_clock_gated, n_regs
+    if n_regs() > 10:
+      assert percent_clock_gated() > 0.50
+
+
