@@ -1,0 +1,54 @@
+#=========================================================================
+# Cadence Innovus Foundation Flow Generator
+#=========================================================================
+# Author : Christopher Torng
+# Date   : June 7, 2019
+#
+
+name: cadence-innovus-flowsetup
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - adk
+  - design.v
+  - design.sdc
+
+outputs:
+  - innovus-foundation-flow
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  - source ./run.sh
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  design_name: design
+  nthreads: 16        # multithreading available to the tool
+  express_flow: False # enable express flow
+  skip_verify_connectivity: False
+
+#-------------------------------------------------------------------------
+# Assertions
+#-------------------------------------------------------------------------
+
+preconditions:
+
+  - assert Tool( 'innovus' )                         # tool check
+  - assert File( 'inputs/adk' )                      # must exist
+  - assert File( 'inputs/design.sdc' )               # must exist
+  - assert File( 'inputs/design.v' )                 # must exist
+
+postconditions:
+
+  - assert File( 'outputs/innovus-foundation-flow' ) # must exist
+
+
