@@ -1,0 +1,79 @@
+#=========================================================================
+# Cadence Innovus
+#=========================================================================
+# Author : Christopher Torng
+# Date   : October 30, 2019
+#
+
+name: cadence-innovus-cts
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+inputs:
+  - innovus-foundation-flow
+  - adk
+  - design.sdc
+  - design.checkpoint
+
+outputs:
+  - design.checkpoint
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  - ln -sf inputs/innovus-foundation-flow
+  - if [[ "x$enable_gui" == "xTrue" ]]; then gui_flag=""; else gui_flag="-nowin"; fi
+  - innovus -overwrite -64 $gui_flag -init START.tcl -log logs/run.log
+  # Outputs
+  - cd outputs
+  - ln -sf ../checkpoints/design.checkpoint
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  # Enable Innovus GUI
+  enable_gui: true
+  # Enable useful clock skew -- [ True | False ]
+  useful_skew: True
+  # Useful clock skew effort -- [ none | standard | medium | extreme ]
+  # - Note: This is ignored if useful_skew is False
+  # - Note: This flag is passed to "setOptMode -usefulSkewCCOpt"
+  useful_skew_ccopt_effort: standard
+  # Subscript execute order
+  order:
+    - setup-ccopt.tcl
+    - main.tcl
+    - reporting.tcl
+
+#-------------------------------------------------------------------------
+# Debug
+#-------------------------------------------------------------------------
+
+debug:
+  - innovus -overwrite -64
+    -init innovus-foundation-flow/custom-scripts/run-debug.tcl
+    -log logs/debug.log
+
+#-------------------------------------------------------------------------
+# Assertions
+#-------------------------------------------------------------------------
+
+preconditions:
+
+  - assert Tool( 'innovus' )                         # tool check
+  - assert File( 'inputs/innovus-foundation-flow' )  # must exist
+  - assert File( 'inputs/adk' )                      # must exist
+  - assert File( 'inputs/design.sdc' )               # must exist
+  - assert File( 'inputs/design.checkpoint' )        # must exist
+
+postconditions:
+
+  - assert File( 'outputs/design.checkpoint' )       # must exist
+
+
