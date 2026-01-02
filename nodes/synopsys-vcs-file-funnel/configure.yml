@@ -1,0 +1,99 @@
+#=========================================================================
+# Synopsys VCS -- File Funnel
+#=========================================================================
+# This step gathers files to funnel to builds for Synopsys VCS simulations
+#
+# The mflowgen nodes that handle VCS simulations are:
+#
+#     - synopsys-vcs-base-opts
+#     - synopsys-vcs-rtl-opts
+#     - synopsys-vcs-gls-opts
+#     - synopsys-vcs-file-funnel
+#     - synopsys-vcs-build
+#     - synopsys-vcs-sim
+#
+# The mflowgen common library breaks up a VCS build into two parts:
+# options and files.
+#
+# Options -- The synopsys-vcs-base-opts node provides a set of common VCS
+# options listed within a single YAML file output. Other nodes such as
+# synopsys-vcs-rtl-opts and synopsys-vcs-gls-opts can further transform
+# these options by accepting the YAML input, adding more options, and
+# making a new YAML output.
+#
+# Files -- The synopsys-vcs-file-funnel node takes all files, and creates
+# the authoritative file list for simulation. It then funnels the files
+# into the build.
+#
+# The VCS build happens in the synopsys-vcs-build node, a simple node
+# that combines the options and the files and runs compilation.
+#
+# The VCS simulation is executed by the synopsys-vcs-sim node, which
+# accepts a built simulator and runs tests with it.
+#
+# This approach allows the same mflowgen nodes (building and simulating)
+# to be reused for both RTL and gate-level simulations. The difference is
+# in whether rtl-opts or gls-opts is connected, as well as which design
+# files are funneled into the build node.
+#
+# Author : Christopher Torng
+# Date   : January 20, 2025
+#
+
+name: synopsys-vcs-file-funnel
+
+#-------------------------------------------------------------------------
+# Inputs and Outputs
+#-------------------------------------------------------------------------
+
+# IMPORTANT -- The biggest responsibility of this node is to produce a
+# file list order (i.e., files-order.yml) in dependency order for the VCS
+# build. Normally, this is a manual step for humans to determine an order
+# in which VCS can analyze all files successfully. Here, we have a
+# reasonable approach to topologically sort the dependencies to automate
+# it.
+#
+# If the automated file dependency ordering does not work, then VCS may
+# not be able to build. Then there are two solutions:
+#
+# 1. Users may override the "order" parameter below to manually specify
+# 2. Users may replace this node with their own custom file funnel node
+#
+# Finding a manual file ordering is very antagonistic to mflowgen's
+# philosophy (you must first construct a graph and gather all files before
+# you can think about what order they should be in). So, we are investing
+# in the automated dependency discovery to make it work in most cases.
+
+# inputs
+#
+# The inputs should be extended to accept files from many places (e.g.,
+# design RTL verilog, test verilog, gate-level verilog netlists, memory
+# macro verilog models)
+#
+# Use the Node.extend_inputs() method when constructing an mflowgen graph
+
+inputs: []
+
+outputs:
+  - files           # directory
+  - files-order.yml # read dependency order of the files
+
+#-------------------------------------------------------------------------
+# Commands
+#-------------------------------------------------------------------------
+
+commands:
+  # Discover file dependencies and produce a files-order.yml
+  # If the "order" parameter is defined, then use that instead
+  #- discover-file-dep-order.py --out files-order.yml
+  - mkdir -p outputs && cd outputs
+  - ln -sf ../files-order.yml
+
+#-------------------------------------------------------------------------
+# Parameters
+#-------------------------------------------------------------------------
+
+parameters:
+  order: []
+
+
