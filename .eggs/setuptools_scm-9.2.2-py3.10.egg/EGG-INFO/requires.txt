@@ -1,0 +1,10 @@
+packaging>=20
+setuptools
+tomli>=1
+
+[rich]
+rich
+
+[simple]
+
+[toml]

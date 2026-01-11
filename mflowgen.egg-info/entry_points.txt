@@ -1,0 +1,3 @@
+[console_scripts]
+mflowgen = mflowgen.cli:main
+mflowgen-python = mflowgen.mflowgen_python:_mflowgen_python_main

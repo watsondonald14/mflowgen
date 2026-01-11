@@ -1,0 +1,2 @@
+pytest>=4.4
+pyyaml>=5.0

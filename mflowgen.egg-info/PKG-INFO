@@ -1,3 +1,23 @@
+Metadata-Version: 2.1
+Name: mflowgen
+Version: 0.8.1
+Summary: mflowgen: A Modular ASIC and FPGA Flow Generator
+Home-page: https://github.com/mflowgen/mflowgen
+Author: Flow Development Team
+Author-email: dev@mflowgen.io
+License: BSD
+Classifier: Development Status :: 4 - Beta
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Programming Language :: Python :: 3 :: Only
+Classifier: Operating System :: MacOS :: MacOS X
+Classifier: Operating System :: POSIX :: Linux
+Classifier: Environment :: Console
+Classifier: Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)
+Classifier: Topic :: Software Development :: Build Tools
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 mflowgen
 ==========================================================================
 [![Documentation Status](https://readthedocs.org/projects/mflowgen/badge/?version=latest)](https://mflowgen.readthedocs.io/en/latest) [![mflowgen pytest CI](https://github.com/watsondonald14/mflowgen/actions/workflows/pytest-ci.yml/badge.svg)](https://github.com/watsondonald14/mflowgen/actions/workflows/pytest-ci.yml) [![pypi](https://img.shields.io/pypi/v/mflowgen)](https://pypi.org/project/mflowgen)
@@ -30,38 +50,22 @@ mflowgen allows you to programmatically define and parameterize a graph of nodes
 
 ### Quick Start
 
-The following guide targets Windows and Linux users. macOS users may use the available [DMG file](../../releases).
+```bash
+# Clone repository
+git clone https://github.com/__USERNAME__/__REPONAME__.git
+cd __REPONAME__
 
+# Install system dependencies
+sudo apt-get install -y graphviz  # Ubuntu/Debian
+# OR
+brew install graphviz              # macOS
 
+# Install Python dependencies
+pip install -r requirements/ci.txt
 
-
-
-Make sure Git & Python are configured on Windows.
-
-Link for Git: https://git-scm.com/install/windows  
-
-Link for Python: https://www.python.org/ftp/python/3.13.12/python-3.13.12-amd64.exe  
-
-Proceed to open GIT CMD.
-
-
-
-
-
-```bash 
-git clone https://github.com/watsondonald14/mflowgen.git
+# Install mflowgen
+pip install .
 ```
-```bash 
-cd mflowgen
-```
-```bash 
-py -m pip install -r requirements.txt
-```
-```bash 
-py install
-```
-
-
 
 ## Basic Usage
 
@@ -216,7 +220,8 @@ pip install .
 # Ubuntu/Debian
 sudo apt-get install graphviz
 
-
+# macOS
+brew install graphviz
 ```
 
 **Node execution fails:**
