@@ -4,90 +4,244 @@ mflowgen
 
 A Python-based modular flow specification and build-system generator for ASIC and FPGA design-space exploration.
 
-## **Heads up, Windows & macOS users:** 
-The manual installation guide is below. macOS folks, you can skip the manual steps by grabbing the [DMG file](../../releases).
+## Overview
 
-mflowgen is a modular flow specification and build-system
-generator for ASIC and FPGA design-space exploration built around
-sandboxed and modular nodes.
+mflowgen is a modular flow specification and build-system generator for ASIC and FPGA design-space exploration built around sandboxed and modular nodes.
 
-mflowgen allows you to programmatically define and parameterize a graph
-of nodes (i.e., sandboxes that run anything you like) with
-well-defined inputs and outputs. Build system files (e.g., make,
-ninja) are then generated which shuttle files between nodes before
-running them.
+mflowgen allows you to programmatically define and parameterize a graph of nodes (i.e., sandboxes that run anything you like) with well-defined inputs and outputs. Build system files (e.g., make, ninja) are then generated which shuttle files between nodes before running them.
 
 <img width='350px' src='docs/_static/images/example-graph.jpg'>
 
-Key features and design philosophies:
+## Key Features
 
-- **Process and technology independence** -- Process technology
-  libraries and variables can be abstracted and separated from
-  physical design scripts. Specifically, a single node called the
-  ASIC design kit (ADK) captures this material in one place for
-  better maintainability and access control.
+- **Process and technology independence** -- Process technology libraries and variables can be abstracted and separated from physical design scripts
+- **Sandboxed and modular nodes** -- Traditional ASIC flows composed of many steps with fixed dependencies become reusable, modular, and self-contained
+- **Programmatically defined build-system generator** -- Python-based scripting with simple graph API for flexible node management
+- **Run-time assertions** -- Built-in assertions checked at runtime with preconditions and postconditions
+- **Hardware design-space exploration focus** -- Parameter expansion for parallel builds and design space characterization
+- **Complete freedom in node definition** -- No restrictions on what nodes do aside from defining inputs/outputs
 
-- **Sandboxed and modular nodes** -- Traditional ASIC flows are
-  composed of many steps executing with fixed path dependencies. The
-  resulting flows have low reusability across designs and technology
-  nodes and can be confusing and monolithic. In contrast,
-  _modularity_ encourages reuse of the same scripts across many
-  projects, while _sandboxing_ makes each node self-contained and
-  also makes the role of each node easy to understand (i.e., take
-  these inputs and generate those outputs).
+## Installation
 
-- **Programmatically defined build-system generator**: A
-  Python-based scripting interface and a simple graph API allows
-  flexible connection and disconnection of edges, insertion and
-  removal of nodes, and parameter space expansions. A simple graph
-  can be specified for a quick synthesis and place-and-route spin,
-  or a more complex graph can be built for a more aggressive chip
-  tapeout (reusing many of the same nodes from before).
+### Requirements
 
-- **Run-time assertions** -- Assertions can be built into each
-  modular node and checked at run-time. Preconditions and
-  postconditions are simply Python snippets that run before and
-  after a node to catch unexpected situations that arise at build
-  time. Assertions are collected and run with pytest. The mflowgen
-  graph-building DSL can also extend a node with _design-specific_
-  assertions by extending Python lists.
+- Python 3.6 or higher
+- graphviz (for visualization)
 
-- **A focus on hardware design-space exploration** -- Parameter
-  expansion can be applied to nodes to quickly spin out parallel
-  builds for design-space exploration at both smaller scales with a
-  single parameter (e.g., sweeping clock targets) as well as at
-  larger scales with multiple parameters (e.g., to characterize the
-  area-energy tradeoff space of a new architectural widget with
-  different knobs). Dependent files are shuttled to each sandbox
-  as needed.
+### Quick Start
 
-- **Complete freedom in defining what nodes do** -- Aside from
-  exposing precisely what the inputs and outputs are, no other
-  restrictions are placed on what nodes do. A node may conduct an
-  analysis pass and report a gate count. A node can also apply a
-  transform pass to a netlist before passing it to other tools. In
-  addition, a node can even instantiate a subgraph to implement a
-  hierarchical flow.
+```bash
+# Clone repository
+git clone https://github.com/watsondonald14/mflowgen.git
+cd mflowgen
 
-mflowgen ships with a limited set of ASIC flow scripts for both
-open-source and commercial tools including synthesis (e.g., Synopsys
-DC, yosys), place and route (e.g., Cadence Innovus Foundation Flow,
-RePlAce, graywolf, qrouter), and signoff (e.g., Synopsys PTPX,
-Mentor Calibre). In addition, we include an open-source 45nm ASIC design
-kit (ADK) assembled from FreePDK45 version 1.4 and the NanGate Open
-Cell Library.
+# Install system dependencies
+sudo apt-get install -y graphviz  # Ubuntu/Debian
+# OR
+brew install graphviz              # macOS
 
+# Install Python dependencies
+pip install -r requirements/ci.txt
 
-More info can be found in the
-[documentation](https://mflowgen.readthedocs.io/en/latest).
+# Install mflowgen
+pip install .
+```
 
---------------------------------------------------------------------------
-License
---------------------------------------------------------------------------
+## Basic Usage
 
-mflowgen is offered under the terms of the Open Source Initiative BSD
-3-Clause License. More information about this license can be found
-here:
+### Running Demo
 
+```bash
+# Run demo setup
+mflowgen run --demo
+
+# Navigate to demo directory
+cd mflowgen-demo && mkdir -p build && cd build
+
+# Configure design
+mflowgen run --design ../GcdUnit
+```
+
+### Common Commands
+
+```bash
+# List all available nodes
+make list
+
+# Check status of nodes
+make status
+
+# View runtime information
+make runtimes
+
+# Generate flow graph visualization
+make graph
+
+# Get detailed info
+make info
+
+# Clean all build artifacts
+make clean-all
+```
+
+### Running Specific Nodes
+
+```bash
+# Run synthesis
+make synopsys-dc-synthesis
+
+# Run place and route
+make cadence-innovus-place-route
+
+# Run signoff
+make synopsys-ptpx-power
+```
+
+### Running Subgraph Targets
+
+For designs with subgraphs:
+
+```bash
+# Run specific subgraph node
+make <subgraph-name>-<node-name>
+
+# Check subgraph status
+make <subgraph-name>-status
+```
+
+## Advanced Usage
+
+### Custom Graph Configuration
+
+Create a Python script to define your flow:
+
+```python
+from mflowgen.core import Graph
+
+# Create new graph
+g = Graph()
+
+# Add nodes
+g.add_node('synthesis', 'path/to/synthesis')
+g.add_node('place-route', 'path/to/pnr')
+
+# Connect nodes
+g.connect_by_name('synthesis', 'place-route')
+
+# Set parameters
+g.set_param('synthesis', 'clock_period', 1.0)
+
+# Build
+g.build()
+```
+
+### Parameter Sweeps
+
+```bash
+# Run with custom parameters
+mflowgen run --design MyDesign --graph-kwargs clock_period=1.0 area_target=1000
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest tests/
+
+# Run specific test
+pytest tests/test_subgraph.py
+```
+
+## Included Flow Scripts
+
+mflowgen ships with flow scripts for:
+
+**Synthesis:**
+- Synopsys Design Compiler (DC)
+- yosys (open-source)
+
+**Place and Route:**
+- Cadence Innovus Foundation Flow
+- RePlAce (open-source)
+- graywolf (open-source)
+- qrouter (open-source)
+
+**Signoff:**
+- Synopsys PrimeTime PX (PTPX)
+- Mentor Calibre
+
+**Design Kit:**
+- Open-source 45nm ASIC Design Kit (ADK)
+- FreePDK45 v1.4 + NanGate Open Cell Library
+
+## Project Structure
+
+```
+mflowgen/
+├── docs/                  # Documentation
+├── mflowgen/             # Main package
+│   ├── core/            # Core graph and node classes
+│   ├── steps/           # Built-in flow steps
+│   └── tests/           # Test suite
+├── requirements/         # Python dependencies
+└── examples/            # Example designs
+```
+
+## Troubleshooting
+
+**Import errors:**
+```bash
+pip install -r requirements/ci.txt --force-reinstall
+pip install .
+```
+
+**Graphviz not found:**
+```bash
+# Ubuntu/Debian
+sudo apt-get install graphviz
+
+# macOS
+brew install graphviz
+```
+
+**Node execution fails:**
+- Check node inputs exist
+- Verify tool paths in configuration
+- Review logs in node build directory
+
+## Documentation
+
+Full documentation: https://mflowgen.readthedocs.io/en/latest
+
+## Development
+
+### Code Quality Checks
+
+```bash
+# Format check
+autoflake --recursive --in-place --remove-duplicate-keys .
+pyupgrade --py3-only --keep-percent-format $(find . -name '*.py')
+
+# Linting
+flake8 --select=F --ignore=F401,F405,F403,F811,F821,F841
+```
+
+### TCL Script Guidelines
+
+Every `[glob]` command must be preceded by `[lsort]` for deterministic behavior:
+
+```tcl
+# Bad - non-deterministic order
+set lib_list [glob stdcells*.lib]
+
+# Good - deterministic order
+set lib_list [lsort [glob stdcells*.lib]]
+```
+
+## License
+
+mflowgen is offered under the terms of the Open Source Initiative BSD 3-Clause License.
+
+More information:
 - http://choosealicense.com/licenses/bsd-3-clause
 - http://opensource.org/licenses/BSD-3-Clause
