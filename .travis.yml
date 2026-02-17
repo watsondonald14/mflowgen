@@ -1,0 +1,100 @@
+#=========================================================================
+# .travis.yml
+#=========================================================================
+# Continuous integration with TravisCI
+
+language: python
+
+python:
+  - "3.6"
+
+#-------------------------------------------------------------------------
+# Install
+#-------------------------------------------------------------------------
+
+install:
+  - sudo apt-get install -y graphviz
+  # For some reason, the latest setuptools (46.1.1) causes permission
+  # denied errors when trying to access site packages (to access scripts
+  # like mflowgen-status), so we are pinning to 46.0.0 and waiting to see
+  # if they will fix it on their end.
+  #
+  # Also need to pin pip (20.0.2) because (20.1) makes pyupgrade exit 1
+  # for whatever reason. We are pinning for now and waiting to see if they
+  # fix it on their end.
+  - pip install --upgrade pip==20.0.2 setuptools==46.0.0 twine
+  - pip install --requirement requirements/ci.txt
+  - pip install .
+  - pip list
+
+#-------------------------------------------------------------------------
+# Tests
+#-------------------------------------------------------------------------
+
+script:
+
+  # Formatting checks
+
+  - autoflake --recursive --in-place --remove-duplicate-keys .
+  - pyupgrade --py3-only --keep-percent-format $(find . -name '*.py')
+  - flake8 --select=F --ignore=F401,F405,F403,F811,F821,F841
+  - git diff --exit-code
+
+  # New format check: every 'glob' in a TCL script must include
+  # 'lsort' to avoid non-determinism.
+  #
+  # Explanation:
+  #   glob by itself returns a list in random order. For determinate order,
+  #   precede the glob with an lsort, as recommended by TCL 'glob' man page.
+  #
+  # Example: given a directory with files 'cells-lvt' and 'cells',
+  #     [glob cells*]         => { cells cells-lvt } ? OR SOMETIMES ? { cells-lvt cells }
+  #     [lsort [glob cells*]] => { cells cells-lvt } ALWAYS
+  # 
+  # So what could go wrong? E.g. a "multivt" view might have
+  # two libraries "stdcells-tt.lib" and "stdcells-bc.lib" such that
+  # the same cell name appears in both libraries but with different
+  # characteristics. If the designer loads the libraries using e.g.
+  # 
+  #   set lib_list [glob stdcells*.lib]
+  # 
+  # they might sometimes get the typical-case cell and other times get
+  # the worst-case cell, leading to erratic and unexpected behavior.
+
+  - echo Every '[glob' command must be preceded by '[lsort' or this test will fail.
+  - |
+    exit_status=0
+    for f in `find * -name \*.tcl`; do
+       ERR=
+       cat -n $f | grep '\[glob ' | grep -v '\[lsort ' > /tmp/tmp$$ && ERR=true
+       if [ "$ERR" ]; then
+         echo BAD FILE $f; cat /tmp/tmp$$; exit_status=13; echo ""
+         /bin/rm /tmp/tmp$$
+       fi
+    done
+    exit $exit_status
+
+
+  # Test that we can configure and run the common targets
+
+  - which mflowgen-python
+
+  - mflowgen run --demo
+  - cd mflowgen-demo && mkdir -p build && cd build
+  - mflowgen run --design ../GcdUnit
+  - make list
+  - make status
+  - make runtimes
+  - make graph
+  - make clean-all
+  - make info
+
+#  - py.test ../mflowgen/tests
+
+#-------------------------------------------------------------------------
+# After success
+#-------------------------------------------------------------------------
+
+after_success:
+  - echo done
+
