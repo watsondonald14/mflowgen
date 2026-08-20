@@ -9,7 +9,7 @@ from pathlib import Path
 from mrflowgen import version
 
 
-version.run_sync(FORCE_SYNC=True)
+version.run_sync()
 
 def _banner() -> Panel:
     return Panel.fit(
