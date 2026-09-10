@@ -6,7 +6,7 @@ import string
 import argparse 
 import sys 
 from pathlib import Path
-from mrflowgen import version
+from mflowgen import version
 
 
 version.run_sync()

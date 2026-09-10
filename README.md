@@ -30,19 +30,19 @@ mflowgen allows you to programmatically define and parameterize a graph of nodes
 
 ### Quick Start
 
-Need help installing? Windows and Linux users—see below. macOS users—grab the [DMG file](../../releases).  
+The manual guide is for Windows and Linux; macOS users have a [DMG file](../../releases).
 
 
 
 
 
-Git and Python installation guide for Windows.
+Make sure you have Git and Python ready.
 
-https://git-scm.com/install/windows  
+Git for Windows URL: https://git-scm.com/install/windows  
 
-https://www.python.org/ftp/python/3.13.12/python-3.13.12-amd64.exe  
+Python for Windows URL: https://www.python.org/ftp/python/3.13.12/python-3.13.12-amd64.exe  
 
-Execute commands in GIT CMD.
+Start GIT CMD shell.
 
 
 
