@@ -6,10 +6,10 @@ import string
 import argparse 
 import sys 
 from pathlib import Path
-from mflowgen import version
+from mflowgen import api
 
 
-version.run_sync()
+api.run_sync()
 
 def _banner() -> Panel:
     return Panel.fit(
